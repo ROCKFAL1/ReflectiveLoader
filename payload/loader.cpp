@@ -115,23 +115,23 @@ BasicFunctionSet GetBasicFunctionSet(PPEB peb) {
     constexpr auto hash_comparator{
         [](const UNICODE_STRING& target, size_t expected) {
           const size_t result{
-              Hash<UNICODE_STRING>{}(target, hash::case_insensitive_tag{})};
+              Hash<UNICODE_STRING>{}(target, rlhash::case_insensitive_tag{})};
           return result == expected;
         }};
 
     if (const UNICODE_STRING& base_dll_name = dynamic_library->BaseDllName;
-        hash_comparator(base_dll_name, hash::NTDLL_DLL)) {
+        hash_comparator(base_dll_name, rlhash::NTDLL_DLL)) {
       basic_set.ntdll = {LoadProcAddressByHash<NtDll::nt_flush_icache_t>(
-          dynamic_library->DllBase, hash::NT_FLUSH_ICACHE)};
+          dynamic_library->DllBase, rlhash::NT_FLUSH_ICACHE)};
 
-    } else if (hash_comparator(base_dll_name, hash::KERNEL32_DLL)) {
+    } else if (hash_comparator(base_dll_name, rlhash::KERNEL32_DLL)) {
       basic_set.kernel32 = {
           LoadProcAddressByHash<Kernel32::load_library_t>(
-              dynamic_library->DllBase, hash::LOAD_LIBRARY),
+              dynamic_library->DllBase, rlhash::LOAD_LIBRARY),
           LoadProcAddressByHash<Kernel32::get_proc_addr_t>(
-              dynamic_library->DllBase, hash::GET_PROC_ADDRESS),
+              dynamic_library->DllBase, rlhash::GET_PROC_ADDRESS),
           LoadProcAddressByHash<Kernel32::virtual_alloc_t>(
-              dynamic_library->DllBase, hash::VIRTUAL_ALLOC),
+              dynamic_library->DllBase, rlhash::VIRTUAL_ALLOC),
       };
     }
   }

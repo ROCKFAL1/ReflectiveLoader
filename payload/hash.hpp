@@ -4,7 +4,7 @@
 #include <intrin.h>
 #include <cstdint>
 
-namespace hash {
+namespace rlhash {
 inline constexpr size_t KERNEL32_DLL{0xA2e88830c762342a};
 inline constexpr size_t NTDLL_DLL{0x82f80830ba02602c};
 
@@ -28,7 +28,7 @@ inline size_t rotr(size_t value, int32_t shift) noexcept {
 }  // namespace details
 
 struct case_insensitive_tag {};
-};  // namespace hash
+};  // namespace rlhash
 
 template <class Ty, class = void>
 struct Hash;
@@ -49,11 +49,11 @@ struct Hash<const char*> {
 template <>
 struct Hash<UNICODE_STRING> {
   size_t operator()(const UNICODE_STRING& str,
-                    hash::case_insensitive_tag) const noexcept {
+                    rlhash::case_insensitive_tag) const noexcept {
     size_t result{0};
     const auto* as_chars{reinterpret_cast<const char*>(str.Buffer)};
     for (size_t idx = 0; idx < str.Length; ++idx) {
-      result = hash::details::rotr(result, hash::KEY);
+      result = rlhash::details::rotr(result, rlhash::KEY);
       if (const auto ch = as_chars[idx]; ch >= 'a') {
         result += static_cast<size_t>(ch) - 0x20;
       } else {

@@ -8,10 +8,12 @@ struct Kernel32 {
   using load_library_t = std::add_pointer_t<decltype(LoadLibraryA)>;
   using get_proc_addr_t = std::add_pointer_t<decltype(GetProcAddress)>;
   using virtual_alloc_t = std::add_pointer_t<decltype(VirtualAlloc)>;
+  using virtual_protect_t = std::add_pointer_t<decltype(VirtualProtect)>;
 
   load_library_t load_library;
   get_proc_addr_t get_proc_addr;
   virtual_alloc_t virtual_alloc;
+  virtual_protect_t virtual_protect;
 };
 
 struct NtDll {

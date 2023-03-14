@@ -11,6 +11,7 @@ inline constexpr size_t NTDLL_DLL{0x82f80830ba02602c};
 inline constexpr size_t LOAD_LIBRARY{0xa9db4996f60be122};
 inline constexpr size_t GET_PROC_ADDRESS{0x4b2197bfd5be9ce6};
 inline constexpr size_t VIRTUAL_ALLOC{0xa6ddc5a6ac02dad2};
+inline constexpr size_t VIRTUAL_PROTECT{0xab36d465b055ead8};
 inline constexpr size_t NT_FLUSH_ICACHE{0xb4a38ae3a399c7b2};
 
 inline constexpr size_t KEY{13};

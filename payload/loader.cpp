@@ -118,7 +118,7 @@ BasicFunctionSet GetBasicFunctionSet(PPEB peb) {
               Hash<UNICODE_STRING>{}(target, rlhash::case_insensitive_tag{})};
           return result == expected;
         }};
-
+      
     if (const UNICODE_STRING& base_dll_name = dynamic_library->BaseDllName;
         hash_comparator(base_dll_name, rlhash::NTDLL_DLL)) {
       basic_set.ntdll = {LoadProcAddressByHash<NtDll::nt_flush_icache_t>(
@@ -132,6 +132,8 @@ BasicFunctionSet GetBasicFunctionSet(PPEB peb) {
               dynamic_library->DllBase, rlhash::GET_PROC_ADDRESS),
           LoadProcAddressByHash<Kernel32::virtual_alloc_t>(
               dynamic_library->DllBase, rlhash::VIRTUAL_ALLOC),
+          LoadProcAddressByHash<Kernel32::virtual_protect_t>(
+              dynamic_library->DllBase, rlhash::VIRTUAL_PROTECT)
       };
     }
   }
@@ -291,14 +293,19 @@ DLLEXPORT DWORD WINAPI ReflectiveLoader(void* parameter) {
   const auto [kernel32, ntdll]{details::GetBasicFunctionSet(peb)};
 
   const auto* nt_header{details::GetNtHeader(image_base)};
+
+  const size_t alloc_size{nt_header->OptionalHeader.SizeOfImage};
   void* new_base{
-      kernel32.virtual_alloc(nullptr, nt_header->OptionalHeader.SizeOfImage,
+      kernel32.virtual_alloc(nullptr, alloc_size,
                              MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE)};
   details::ReloadImage(new_base, image_base, *nt_header);
 
   details::ResolveImports(new_base, *nt_header, kernel32.load_library,
                           kernel32.get_proc_addr);
   details::RelocateIfNeeded(new_base, *nt_header);
+
+  DWORD dummy;
+  kernel32.virtual_protect(new_base, alloc_size, PAGE_EXECUTE_READ, &dummy);
 
   const auto entry_point{reinterpret_cast<entry_point_t>(
       static_cast<std::byte*>(new_base) +
